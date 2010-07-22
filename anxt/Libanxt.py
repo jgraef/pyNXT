@@ -79,6 +79,10 @@ class Libanxt:
             return None
 
     @staticmethod
+    def version(libanxt):
+        return str(int(libanxt.nxt_version_major()))+"."+str(int(libanxt.nxt_version_minor()))
+
+    @staticmethod
     def init_prototypes(l):
         # TODO: replace some c_void_p with correct pointer types (e.g. POINTER(c_int))
         prototypes = (# libanxt/nxt.c

@@ -41,10 +41,13 @@ Libanxt.init_prototypes(__libanxt__)
 
 if __name__!="__main__":
     # general definitions
-    __version__ = str(int(__libanxt__.nxt_version_major()))+"."+str(int(__libanxt__.nxt_version_minor()))
+    __version__ = "0.10"
     #__all__ = ["NXT", "NXTHandle", "Motor", "Sensor", "AnalogSensor", "DigitalSensor", "I2C", "File", "FileHandle", "Display", "DisplayHandle"]
     # load __doc__ from file
     __doc__ = load_doc()
+
+    # check versions
+    assert __version__==Libanxt.version(__libanxt__)
 
     # import submodules
     from .NXT import NXT, NXTHandle
