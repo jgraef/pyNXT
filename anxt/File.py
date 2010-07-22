@@ -19,44 +19,6 @@ from ctypes import CDLL, c_int, c_void_p, c_char, c_long, c_char_p, byref, POINT
 from .Libanxt import Libanxt
 
 class File:
-    @staticmethod
-    def open(nxt, filename, oflags = ["OREAD"], filesize = None):
-        # in case someone forgot to do a list
-        if (type(oflags)!=list):
-            oflags = [oflags]
-
-        f = FileHandle(nxt)
-        
-        if (f.open(filename, oflags, filesize)):
-            return f
-        else:
-            del f
-            return False
-
-    @staticmethod
-    def remove(nxt, filename):
-        return (int(nxt.libanxt.nxt_file_remove(nxt.handle, filename))==0)
-
-    @staticmethod
-    def find(nxt, wildcard = "*.*"):
-        def add_file(files, name, size):
-            files.append((name.value.decode(), size.value))
-    
-        filename = c_char_p()
-        filesize = c_int()
-        files = []
-    
-        fh = int(nxt.libanxt.nxt_file_find_first(nxt.handle, wildcard, byref(filename), byref(filesize)))
-        if (fh!=-1):
-            while (fh!=-1):
-                add_file(files, filename, filesize)
-                valid_fh = fh
-                fh = int(nxt.libanxt.nxt_file_find_next(nxt.handle, fh, byref(filename), byref(filesize)))
-            nxt.libanxt.nxt_file_close(nxt.handle, valid_fh)
-
-        return files
-
-class FileHandle:
     oflags = {"OWFRAG": 0,
               "OWLINE": 1,
               "OAPPND": 2,
@@ -65,16 +27,20 @@ class FileHandle:
 
     def __init__(self, nxt):
         self.nxt = nxt
+        self.handle = None
 
     def __del__(self):
         self.close()
 
     def open(self, file, oflags, filesize = None):
+        if (self.handle!=None):
+            return False
+
         oflag = 0
         for f in oflags:
             oflag |= self.oflags.get(f, 0)
 
-        fsize = Libanxt.file_open_union()
+        fsize = Libanxt.FileOpenUnion()
         
         if (oflag&4!=0 or oflag&2!=0):
             ret_filesize = c_int(0)
@@ -114,10 +80,7 @@ class FileHandle:
             if (raw):
                 return buf
             else:
-                s = ""
-                for c in buf:
-                    s += c.decode()
-                return s
+                return "".join(map(lambda c: c.decode(), buf))
 
     def write(self, d, n = None):
         if (self.handle==None):

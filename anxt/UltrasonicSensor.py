@@ -1,4 +1,4 @@
-# test.py
+# anxt/UltrasonicSensor.py
 #  pyNXT - Python wrappers for aNXT
 #  Copyright (C) 2010  Janosch Gräf
 #
@@ -15,17 +15,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import anxt
-from sys import exit
-from time import sleep
+from .I2C import DEFAULT_I2C_ADDR
+from .Libanxt import Libanxt
+from .Sensor import DEFAULT_DIGITAL_PORT, DigitalSensor
 
-print("Module:", anxt.__name__, anxt.__version__)
-print()
+class UltrasonicSensor(DigitalSensor):
+    def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
+        DigitalSensor.__init__(self, nxt, i2c_addr)
 
-nxt = anxt.NXT()
-if (not nxt):
-    exit("Could not find NXT")
-
-nxt.beep(440, 250)
-
-nxt.close()
+    def read(self):
+        self.set_addr_param("us")
+        dist = int(self.nxt.libanxt.nxt_us_get_dist(self.nxt.handle, self.port-1))
+        return dist if (dist>=0) else False

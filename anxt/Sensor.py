@@ -15,24 +15,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ctypes import CDLL, c_int, c_void_p, c_char_p, Structure, byref
+from ctypes import CDLL, c_int, c_float, c_void_p, c_char_p, Structure, byref
 from .NXT import NXT
 from .I2C import I2C, DEFAULT_I2C_ADDR
-
+from .Libanxt import Libanxt
+from math import ceil
 
 DEFAULT_DIGITAL_PORT = 4
-
-
-# move into Libanxt class
-class AnalogSensorValues(Structure):
-    _fields_ = [("is_calibrated", c_int),
-                ("type", c_int),
-                ("mode", c_int),
-                ("raw", c_int),
-                ("normalized", c_int),
-                ("scaled", c_int),
-                ("calibrated", c_int)]
-
 
 class Sensor:
     types = {"NONE":           0x00,
@@ -92,7 +81,7 @@ class Sensor:
 
     def get_values(self, update_type = True, update_mode = True):
         if (self.nxt!=None and self.nxt.handle!=None):
-            values = AnalogSensorValues()
+            values = Libanxt.AnalogSensorValues()
             if (int(self.nxt.libanxt.nxt_get_sensor_values(self.nxt.handle, self.port-1, byref(values)))==0):
                 if (update_type):
                     self.type = values.type
@@ -132,6 +121,21 @@ class AnalogSensor(Sensor):
         else:
             return False
 
+class TouchSensor(AnalogSensor):
+    def __init__(self, nxt, port = 1):
+        AnalogSensor.__init__(self, nxt, port, "SWITCH", "BOOLEAN")
+    
+class LightSensor(AnalogSensor):
+    def __init__(self, nxt, port = 3, light = True):
+        type = "LIGHT_"+("IN" if not light else "")+"ACTIVE"
+        AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
+
+class SoundSensor(AnalogSensor):
+    def __init__(self, nxt, port = 2, dba = False):
+        type = "SOUND_DB"+("A" if dba else "")
+        AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
+
+
 class DigitalSensor(Sensor, I2C):
     def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
         Sensor.__init__(self, nxt, port)
@@ -139,16 +143,6 @@ class DigitalSensor(Sensor, I2C):
 
         self.set_sensor_typemode("LOWSPEED_9V", None)
 
-    def set_addr_param(sensor_name):
+    def set_addr_param(self, sensor_name):
         c_addr = c_int.in_dll(self.nxt.libanxt, "nxt_"+sensor_name+"_i2c_addr")
         c_addr = c_int(self.addr)
-
-class UltraSonic(DigitalSensor):
-    def __init__(self, nxt, port = 4, i2c_addr = 0x02):
-        DigitalSensor.__init(self, nxt, i2c_addr)
-
-    def read():
-        self.set_addr_param("us")
-        return int(self.nxt.libanxt.nxt_motor_sync(self.nxt.handle, self.port-1))
-
-    # TODO: wrap other functions

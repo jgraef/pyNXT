@@ -13,9 +13,11 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ctypes import CDLL, c_int, c_void_p, c_char_p, byref
+from .File import File
+from .Module import Module
 
 def NXT(name = None, host = "localhost", port = 51337, password = ""):
     nxt = NXTHandle()
@@ -247,3 +249,78 @@ class NXTHandle:
             return int(self.libanxt.nxt_delete_userflash(self.handle))==0
         else:
             return False
+
+    # file functions ###########################################################
+    
+    def fopen(self, filename, oflags = ["OREAD"], filesize = None):
+        # in case someone forgot to do a list
+        if (type(oflags)!=list):
+            oflags = [oflags]
+
+        f = File(self)
+        
+        if (f.open(filename, oflags, filesize)):
+            return f
+        else:
+            del f
+            return False
+
+    def fremove(self, filename):
+        return (int(self.libanxt.nxt_file_remove(self.handle, filename))==0)
+
+    def ffind(self, wildcard = "*.*"):
+        filename = c_char_p()
+        filesize = c_int()
+        files = []
+    
+        fh = int(self.libanxt.nxt_file_find_first(self.handle, wildcard, byref(filename), byref(filesize)))
+        if (fh!=-1):
+            while (fh!=-1):
+                files.append((name.value.decode(), size.value))
+                valid_fh = fh
+                fh = int(self.libanxt.nxt_file_find_next(self.handle, fh, byref(filename), byref(filesize)))
+            self.libanxt.nxt_file_close(self.handle, valid_fh)
+
+        return files
+
+    # module functions #########################################################
+
+    def modopen(self, modname):
+        modules = self.modfind(modname)
+        if (modules==[]):
+            return False
+        else:
+            return Module(self, modules[0][1], modules[0][2])
+
+    def modfind(self, wildcard = "*.mod"):
+        modname = c_char_p()
+        modid = c_int()
+        modsize = c_int()
+        iomapsz = c_int()
+        modules = []
+    
+        mh = int(self.libanxt.nxt_mod_first(self.handle, wildcard, byref(modname), byref(modid), byref(modsize), byref(iomapsz)))
+        if (mh!=-1):
+            while (mh!=-1):
+                modules.append((modname.value.decode(), modid.value, modsize.value, iomapsz.value))
+                last_mh = mh
+                mh = int(self.libanxt.nxt_mod_next(self.handle, last_mh, byref(modname), byref(modid), byref(modsize), byref(iomapsz)))
+                self.libanxt.nxt_mod_close(self.handle, last_mh)
+
+        return modules
+
+    def turnoff(self):
+        mod = self.modopen("Ui.mod")
+        mod.write('\x01', 39)
+        self.close()
+
+    # wait functions ###########################################################
+    
+    def wait_after_direct_command(self):
+        self.libanxt.nxt_wait_after_direct_command()
+        
+    def wait_after_communication_command(self):
+        self.libanxt.nxt_wait_after_communication_command()
+
+    def wait_extra_long_after_communication_command(self):
+        self.libanxt.nxt_wait_extra_long_after_communication_command()

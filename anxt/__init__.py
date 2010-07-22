@@ -18,6 +18,22 @@
 # import Libanxt class
 from .Libanxt import Libanxt
 
+# documentation load
+def load_doc(filename = "__doc__.txt"):
+    #import OS
+    global __path__
+    
+    path = __path__[0]+"/"+filename
+    try:
+        f = open(path, "r")
+        doc = "".join(f.readlines())
+        f.close()
+    except:
+        doc = "Could not load documentation from \""+path+"\"\n"
+        
+    return doc
+        
+
 # load libraries
 __libanxt__ = Libanxt.load("libanxt.so")
 assert __libanxt__!=None
@@ -25,16 +41,24 @@ Libanxt.init_prototypes(__libanxt__)
 
 if __name__!="__main__":
     # general definitions
-    __doc__ = "This is a python module for the LEGO Mindstorms NXT"
     __version__ = str(int(__libanxt__.nxt_version_major()))+"."+str(int(__libanxt__.nxt_version_minor()))
+    #__all__ = ["NXT", "NXTHandle", "Motor", "Sensor", "AnalogSensor", "DigitalSensor", "I2C", "File", "FileHandle", "Display", "DisplayHandle"]
+    # load __doc__ from file
+    __doc__ = load_doc()
 
     # import submodules
     from .NXT import NXT, NXTHandle
     from .Motor import Motor
-    from .Sensor import Sensor, AnalogSensor, DigitalSensor
+    from .Sensor import Sensor, AnalogSensor, TouchSensor, LightSensor, SoundSensor, DigitalSensor
     from .I2C import I2C
-    # TODO see File.py
-    from .File import File, FileHandle
+    from .File import File
+    from .Display import Display, DisplayHandle
+    from .Module import Module
+    from .UltrasonicSensor import UltrasonicSensor
+    from .PSPSensor import PSPSensor
+    from .AccelerationSensor import AccelerationSensor
+    from .CameraSensor import CameraSensor
+    from .HIDSensor import HIDSensor
 
     # give NXT class libanxt
     NXTHandle.libanxt = __libanxt__

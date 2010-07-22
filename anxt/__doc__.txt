@@ -1,0 +1,5 @@
+This module provides access to objects and functions used to control a LEGO
+Mindstorms NXT. In general it is a wrapper for the C library aNXT, but it also
+wraps the interface into classes and objects, so that Mindstorms NXT is
+programmable in an object-oriented manner.
+TODO

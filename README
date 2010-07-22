@@ -1,0 +1,5 @@
+pyNXT 0.10
+
+pyNXT is the python interface for the aNXT library. Now you can program your LEGO Mindstorms NXT in an object-oriented manner in python.
+
+In general pyNXT is just a wrapper for the C library aNXT but it also extends it to object-orientation.
