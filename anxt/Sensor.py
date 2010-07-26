@@ -135,14 +135,14 @@ class TouchSensor(AnalogSensor):
         AnalogSensor.__del__(self)
     
 class LightSensor(AnalogSensor):
-    def __init__(self, nxt, port = 3, light = True):
+    def __init__(self, nxt, port = 3, light = False):
         type = "LIGHT_"+("IN" if not light else "")+"ACTIVE"
         AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
 
     def __del__(self):
         AnalogSensor.__del__(self)
 
-    def set_light(self, on_off = True):
+    def set_light(self, on_off):
         type = "LIGHT_"+("IN" if not on_off else "")+"ACTIVE"
         self.set_sensor_type(type)
         
