@@ -59,6 +59,9 @@ class Sensor:
         self.type = None
         self.mode = None
 
+    def __del__(self):
+        self.set_sensor_typemode(None, None)
+
     def set_sensor_type(self, type):
         if (self.nxt!=None and self.nxt.handle!=None and type in self.types):
             return self.set_sensor_typemode(type, self.mode)
@@ -84,9 +87,9 @@ class Sensor:
             values = Libanxt.AnalogSensorValues()
             if (int(self.nxt.libanxt.nxt_get_sensor_values(self.nxt.handle, self.port-1, byref(values)))==0):
                 if (update_type):
-                    self.type = values.type
+                    self.type = [k for k, v in self.types.items() if v == values.type][0]
                 if (update_mode):
-                    self.mode = values.mode
+                    self.mode = [k for k, v in self.modes.items() if v == values.mode][0]
                 return values
             else:
                 return False
@@ -108,6 +111,9 @@ class AnalogSensor(Sensor):
         Sensor.__init__(self, nxt, port)
         self.set_sensor_typemode(type, mode)
 
+    def __del__(self):
+        Sensor.__del__(self)
+
     def read(self):
         values = self.get_values()
         if (values!=False):
@@ -124,11 +130,17 @@ class AnalogSensor(Sensor):
 class TouchSensor(AnalogSensor):
     def __init__(self, nxt, port = 1):
         AnalogSensor.__init__(self, nxt, port, "SWITCH", "BOOLEAN")
+
+    def __del__(self):
+        AnalogSensor.__del__(self)
     
 class LightSensor(AnalogSensor):
     def __init__(self, nxt, port = 3, light = True):
         type = "LIGHT_"+("IN" if not light else "")+"ACTIVE"
         AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
+
+    def __del__(self):
+        AnalogSensor.__del__(self)
 
     def set_light(self, on_off = True):
         type = "LIGHT_"+("IN" if not on_off else "")+"ACTIVE"
@@ -145,6 +157,13 @@ class SoundSensor(AnalogSensor):
         type = "SOUND_DB"+("A" if dba else "")
         AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
 
+    def __del__(self):
+        AnalogSensor.__del__(self)
+
+    def set_dba(self, dba = True):
+        type = "SOUND_DB"+("A" if dba else "")
+        self.set_sensor_type(type)
+
 
 class DigitalSensor(Sensor, I2C):
     def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
@@ -152,6 +171,9 @@ class DigitalSensor(Sensor, I2C):
         I2C.__init__(self, nxt, port, i2c_addr)
 
         self.set_sensor_typemode("LOWSPEED_9V", None)
+
+    def __del__(self):
+        Sensor.__del__(self)
 
     def set_addr_param(self, sensor_name):
         c_addr = c_int.in_dll(self.nxt.libanxt, "nxt_"+sensor_name+"_i2c_addr")
