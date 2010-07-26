@@ -73,7 +73,7 @@ melody = [("c", DUR1), # Al -
 nxt = anxt.NXT()
 # don't forget to check if you found a NXT
 if (not nxt):
-    exit("Could find NXT")
+    exit("Could not find NXT")
 
 # play melody
 for note in melody:
