@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http:#www.gnu.org/licenses/>.
 
 from sys import exit
-from time import sleep
+from time import time, sleep
 from threading import Thread, Lock, Event
 
 # import aNXT
@@ -117,12 +117,19 @@ class MorseTelegraph():
 
     def send_signal(self, s):
         length = self.length[0 if (s=='.') else 1]
+        ts = time()
         self.light.light_on()
         if (self.tone!=None):
             self.nxt.beep(self.tone, length*1000)
-        sleep(length)
+        self.sleep_remaining(ts, length)
+        ts = time()
         self.light.light_off()
-        sleep(self.pause[0])
+        self.sleep_remaining(ts, self.pause[0])
+
+    def sleep_remaining(self, ts, tp):
+        tr = tp+ts-time()
+        if (tr>0):
+            sleep(tr)
 
 if __name__=="__main__":
     m = MorseTelegraph()
