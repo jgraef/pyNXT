@@ -61,13 +61,13 @@ class Sensor:
 
     def set_sensor_type(self, type):
         if (self.nxt!=None and self.nxt.handle!=None and type in self.types):
-            return set_sensor_typemode(type, self.mode)
+            return self.set_sensor_typemode(type, self.mode)
         else:
             return False
 
     def set_sensor_mode(self, mode):
         if (self.nxt!=None and self.nxt.handle!=None and mode in self.modes):
-            return set_sensor_typemode(self.type, mode)
+            return self.set_sensor_typemode(self.type, mode)
         else:
             return False
 
@@ -129,6 +129,16 @@ class LightSensor(AnalogSensor):
     def __init__(self, nxt, port = 3, light = True):
         type = "LIGHT_"+("IN" if not light else "")+"ACTIVE"
         AnalogSensor.__init__(self, nxt, port, type, "PERCENT")
+
+    def set_light(self, on_off = True):
+        type = "LIGHT_"+("IN" if not on_off else "")+"ACTIVE"
+        self.set_sensor_type(type)
+        
+    def light_on(self):
+        self.set_light(True)
+        
+    def light_off(self):
+        self.set_light(False)
 
 class SoundSensor(AnalogSensor):
     def __init__(self, nxt, port = 2, dba = False):
