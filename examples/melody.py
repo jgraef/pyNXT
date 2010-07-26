@@ -15,11 +15,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http:#www.gnu.org/licenses/>.
 
-#import exit and sleep
+# import exit and sleep
 from sys import exit
 from time import sleep
 
-#import aNXT
+# import aNXT
 import anxt
 
 # we have two different duration for notes
@@ -71,7 +71,7 @@ melody = [("c", DUR1), # Al -
 # opens NXT handle
 # No argument means that we that we do not care about which NXT to open
 nxt = anxt.NXT()
-# don't foget to check if you find a NXT
+# don't forget to check if you found a NXT
 if (not nxt):
     exit("Could find NXT")
 
