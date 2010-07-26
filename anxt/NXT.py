@@ -222,7 +222,7 @@ class NXTHandle:
         
     def beep(self, frequency, duration):
         if (self.handle!=None):
-            return int(self.libanxt.nxt_beep(self.handle, c_int(frequency), c_int(duration)))==0
+            return int(self.libanxt.nxt_beep(self.handle, c_int(int(frequency)), c_int(int(duration))))==0
         else:
             return False
 
