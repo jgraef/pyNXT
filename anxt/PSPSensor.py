@@ -29,7 +29,7 @@ class PSPSensor(DigitalSensor):
 
     
     def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
-        DigitalSensor.__init__(self, nxt, i2c_addr)
+        DigitalSensor.__init__(self, nxt, port, i2c_addr)
 
     def read(self):
         return self.get_buttons(), self.get_joystick()
