@@ -1,4 +1,4 @@
-# test.py
+# anxt/NXTError.py
 #  pyNXT - Python wrappers for aNXT
 #  Copyright (C) 2010  Janosch Gräf
 #
@@ -15,15 +15,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import anxt
 
+class NXTError(Exception):
+    def __init__(self, nxt_or_string):
+        if (type(nxt_or_string)==str):
+            self.error_code = None
+            self.error_msg = nxt_or_string
+        else: # nxt_or_string must be of type NXT
+            nxt = nxt_or_string
+            self.error_code = nxt.error()
+            self.error_msg = nxt.strerror(self.error_code)
 
-print("Module:", anxt.__name__, anxt.__version__)
-print()
-
-nxt = anxt.NXT()
-if (not nxt):
-    exit("Could not find NXT")
-
-nxt.beep(220, 100)
-print("NXT Name: "+nxt.get_name())
+    def __str__(self):
+        if (self.error_code!=None):
+            return "NXT Error [#"+str(self.error_code)+"]: "+self.error_msg
+        else:
+            return "NXT Error: "+self.error_msg
+ 

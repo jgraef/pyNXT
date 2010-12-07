@@ -42,7 +42,14 @@ Libanxt.init_prototypes(__libanxt__)
 if __name__!="__main__":
     # general definitions
     __version__ = "0.10"
-    #__all__ = ["NXT", "NXTHandle", "Motor", "Sensor", "AnalogSensor", "DigitalSensor", "I2C", "File", "FileHandle", "Display", "DisplayHandle"]
+    # TODO set __all__
+    __all__ = ["NXT",
+               "Motor",
+               "Sensor", "AnalogSensor", "TouchSensor", "LightSensor", "SoundSensor", "DigitalSensor",
+               "I2C",
+               "Display",
+               "Module",
+               "UltrasonicSensor", "PSPSensor", "AccelerationSensor", "CameraSensor", "HIDSensor"]
     # load __doc__ from file
     __doc__ = load_doc()
 
@@ -50,7 +57,8 @@ if __name__!="__main__":
     assert __version__==Libanxt.version(__libanxt__)
 
     # import submodules
-    from .NXT import NXT, NXTHandle
+    from .NXT import NXT
+    from .NXTError import NXTError
     from .Motor import Motor
     from .Sensor import Sensor, AnalogSensor, TouchSensor, LightSensor, SoundSensor, DigitalSensor
     from .I2C import I2C
@@ -63,4 +71,4 @@ if __name__!="__main__":
     from .HIDSensor import HIDSensor
 
     # give NXT class libanxt
-    NXTHandle.libanxt = __libanxt__
+    NXT.libanxt = __libanxt__

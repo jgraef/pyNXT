@@ -19,10 +19,6 @@
 from ctypes import CDLL, c_void_p, c_int, c_float, c_char_p, c_long, c_ubyte, POINTER, Union, Structure
 
 class Libanxt:
-    class FileOpenUnion(Union):
-        _fields_ = [("filesize", c_int),
-                    ("fs_ref", POINTER(c_int))]
-        
     class AnalogSensorValues(Structure):
         _fields_ = [("is_calibrated", c_int),
                     ("type", c_int),
@@ -155,7 +151,9 @@ class Libanxt:
                       [l.nxt_i2c_get_vendorid, c_int, c_void_p, c_int, c_int],
                       [l.nxt_i2c_get_deviceid, c_int, c_void_p, c_int, c_int],
                       # libanxt/file.c
-                      [l.nxt_file_open, c_int, c_void_p, c_char_p, c_int, Libanxt.FileOpenUnion],
+                      [l.nxt_file_open_write, c_int, c_void_p, c_char_p, c_int],
+                      [l.nxt_file_open_write_linear, c_int, c_void_p, c_char_p, c_int],
+                      [l.nxt_file_open_read, c_int, c_void_p, c_char_p, POINTER(c_int)],
                       [l.nxt_file_read, c_int, c_void_p, c_int, c_void_p, c_int],
                       [l.nxt_file_write, c_int, c_void_p, c_int, c_char_p, c_int],
                       [l.nxt_file_close, c_int, c_void_p, c_int],

@@ -16,18 +16,13 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ctypes import CDLL, c_int, c_void_p, c_char_p, byref
-from .File import FileIO
+import io
+from .File import BufferedIO
 from .Module import Module
+from .NXTError import NXTError
 
-def NXT(name = None, host = "localhost", port = 51337, password = ""):
-    nxt = NXTHandle()
-    if (nxt.open(name, host, port, password)):
-        return nxt
-    else:
-        del nxt
-        return False
 
-class NXTHandle:
+class NXT:
     # NXT error numbers
     errors = {"SUCCESS": 0x00,
               "TRANSACTION_IN_PROGRESS": 0x20,
@@ -75,26 +70,19 @@ class NXTHandle:
     # C library "libanxt.so" (set by __init__.py)
     libanxt = None
 
-    def __init__(self):
-        pass
+    def __init__(self, name = None, hostname = "localhost", port = 51337, password = ""):
+        self.handle = self.libanxt.nxt_open_net(name, hostname, port, password)
+        if (self.handle==None):
+            raise NXTError("Can't find NXT")
         
     def __del__(self):
-        self.close()
+        self.libanxt.nxt_close(self.handle)
 
-    def open(self, name = None, hostname = "localhost", port = 51337, password = ""):
-        self.handle = self.libanxt.nxt_open_net(name, hostname, port, password)
+    def open(self):
         return self.handle!=None
 
     def close(self):
-        if (self.handle!=None):
-            self.libanxt.nxt_close(self.handle)
-            self.handle = None
-            return True
-        else:
-            return False
-
-    def is_connected(self):
-        return self.handle!=None
+        pass # deprecated (done by __del__)
 
     def error(self):
         if (self.handle!=None):
@@ -252,23 +240,20 @@ class NXTHandle:
 
     # file functions ###########################################################
     
-    def fopen(self, filename, oflags = ["OREAD"], filesize = None):
-        # in case someone forgot to do a list
-        if (type(oflags)!=list):
-            oflags = [oflags]
+    def open(self, filename, mode = "rt", linear = False, encoding = None, errors = None, newline = None, line_buffering = False):
+        buffer = BufferedIO(self, filename, mode[0], linear)
+        try:
+            if (mode[1]=='t'):
+                return io.TextIOWrapper(buffer, encoding, errors, newline, line_buffering)
+        except IndexError:
+            pass
+        return buffer
 
-        f = File(self)
-        
-        if (f.open(filename, oflags, filesize)):
-            return f
-        else:
-            del f
-            return False
+    def remove(self, filename):
+        if (int(self.libanxt.nxt_file_remove(self.handle, filename))==-1):
+            raise NXTError(self)
 
-    def fremove(self, filename):
-        return (int(self.libanxt.nxt_file_remove(self.handle, filename))==0)
-
-    def ffind(self, wildcard = "*.*"):
+    def find(self, wildcard = "*.*"):
         filename = c_char_p()
         filesize = c_int()
         files = []

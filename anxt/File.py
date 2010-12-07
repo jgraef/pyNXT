@@ -15,50 +15,48 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ctypes import CDLL, c_int, c_void_p, c_char, c_long, c_char_p, byref, POINTER, cast
+from ctypes import CDLL, c_uint, c_int, c_void_p, c_char, c_long, c_char_p, byref, POINTER
 from .Libanxt import Libanxt
+from .NXTError import NXTError
 import io
 
-class FileIO(io.RawIOBase):
-    oflags = {"OWFRAG": 0,
-              "OWLINE": 1,
-              "OAPPND": 2,
-              "OREAD":  4,
-              "OWOVER": 8}
 
-    def __init__(self, nxt, path, mode = "r", filesize = None):
+class RawIO(io.RawIOBase):
+    def __init__(self, nxt, filename, mode = "r", filesize = None, linear = False):
         self.nxt = nxt
-        self.handle = None
-        self.open(path, oflags, filesize)
+
+        self.mode = mode        
+        if (mode=='r'):
+            # open file for reading
+            _filesize = c_int()
+            self.handle = self.nxt.libanxt.nxt_file_open_read(self.nxt.handle, filename, byref(_filesize))
+            self.filesize = _filesize.value
+        elif (mode=='w'):
+            # open file for writing
+            # TODO: remove file if existing
+            if (filesize==None):
+                raise NXTError("Please specify the filesize you want.")
+            # try to remove file (ignore error)
+            #try:
+            print("remove: "+filename)
+            nxt.remove(filename)
+            #except NXTError:
+            #    pass
+            # open file
+            if (linear):
+                self.handle = self.nxt.libanxt.nxt_file_open_write_linear(self.nxt.handle, filename, filesize)
+            else:
+                self.handle = self.nxt.libanxt.nxt_file_open_write(self.nxt.handle, filename, filesize)
+            self.filesize = filesize
+        else:
+            raise NXTError("Invalid mode: "+repr(mode))
+
+        if (self.handle<0):
+            raise NXTError(self.nxt)
+
 
     def __del__(self):
         self.close()
-
-    def open(self, file, oflags, filesize = None):
-        if (self.handle!=None):
-            return False
-
-        oflag = 0
-        for f in oflags:
-            oflag |= self.oflags.get(f, 0)
-
-        fsize = Libanxt.FileOpenUnion()
-        
-        if (oflag&4!=0 or oflag&2!=0):
-            ret_filesize = c_int(0)
-            fsize.fs_ref = cast(byref(ret_filesize), POINTER(c_int))
-            self.handle = int(self.nxt.libanxt.nxt_file_open(self.nxt.handle, file, oflag, fsize))
-            self.filesize = ret_filesize.value
-        else:
-            fsize.filesize = filesize
-            self.handle = int(self.nxt.libanxt.nxt_file_open(self.nxt.handle, file, oflag, fsize))
-            self.filesize = filesize
-
-        if (self.handle==-1):
-            self.handle = None
-            return False
-        else:
-            return True
 
     def close(self):
         if (self.handle!=None):
@@ -70,26 +68,82 @@ class FileIO(io.RawIOBase):
         else:
             return False
 
-    def read(self, n = None, raw = False):
+    def fileno(self):
+        return self.handle
+
+    def isatty(self):
+        return False
+
+    def seekable(self):
+        return False
+
+    def seek(self, offset, whence):
+        raise IOError("Not seekable")
+
+    def tell(self):
+        raise IOError("Not seekable")
+
+    def truncate(self, size = None):
+        raise IOError("Not seekable")
+
+    def readable(self):
+        return self.mode=='r'
+
+    def writable(self):
+        return self.mode=='w'
+
+    def read(self, n = -1):
         if (self.handle==None):
-            return False
-        
-        if (n==None):
+            raise NXTError("File not opened")
+
+        if (n==-1):
             n = self.filesize
-            
+
         buf = (c_char * n)()
-        if (int(self.nxt.libanxt.nxt_file_read(self.nxt.handle, self.handle, byref(buf), n))>0):
-            if (raw):
-                return buf
-            else:
-                return "".join(map(lambda c: c.decode(), buf))
+        n = self.nxt.libanxt.nxt_file_read(self.nxt.handle, self.handle, byref(buf), n)
+        if (n<0):
+            raise NXTError(self.nxt)
+        else:
+            return buf
+
+    def readall(self):
+        return self.read(-1)
 
     def write(self, d, n = None):
         if (self.handle==None):
-            return False
+            raise NXTError("File not opened")
         
         if (n==None):
             n = len(d)
 
-        n = int(self.nxt.libanxt.nxt_file_write(self.nxt.handle, self.handle, c_char_p(d), n))
-        return n if (n>=0) else False
+        n = self.nxt.libanxt.nxt_file_write(self.nxt.handle, self.handle, c_char_p(d), n)
+        if (n<0):
+            raise NXTError(self.nxt)
+        else:
+            return n
+
+
+class BufferedIO(io.BytesIO):
+    def __init__(self, nxt, filename, mode = 'r', linear = False):
+        self.nxt = nxt
+        self.filename = filename
+        self.mode = mode
+        self.linear = linear
+        if (mode=='r' or mode=='a'):
+            # read and buffer data
+            raw = RawIO(nxt, filename, 'r')
+            io.BytesIO.__init__(self, raw.readall())
+            if (mode=='a'):
+                self.seek(0, io.SEEK_END)
+            raw.close()
+        else:
+            # setup empty buffer
+            io.BytesIO.__init__(self)
+            self.pos = 0
+
+    def flush(self):
+        if (self.mode=='w' or self.mode=='a'):
+            buf = self.getvalue()
+            raw = RawIO(self.nxt, self.filename, 'w', len(buf), self.linear)
+            raw.write(buf)
+            raw.close()
