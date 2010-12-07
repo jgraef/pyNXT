@@ -27,5 +27,6 @@ if (not nxt):
     exit("Could not find NXT")
 
 nxt.beep(440, 250)
+print("NXT Name: "+nxt.get_name())
 
 nxt.close()

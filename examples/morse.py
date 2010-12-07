@@ -138,6 +138,8 @@ if __name__=="__main__":
         print("Morse telegraph running. Enter '\\help' for help")
         while (True):
             line = input("Morse> ")
+            if (len(line)==0):
+                continue
             if (line[0]=="\\"):
                 if (line[1]=="\\"):
                     line = line[1:]
