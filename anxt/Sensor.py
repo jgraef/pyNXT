@@ -48,7 +48,7 @@ class Sensor:
              "ANGLE_STEP":       0xE0,
              "SLOPE_MASK":       0x1F,
              "MODE_MASK":        0xE0}
-    valid_ports = (0, 1, 2, 3)
+    valid_ports = (1, 2, 3, 4)
 
     def __init__(self, nxt, port = None):
         if (not port in self.valid_ports):
@@ -85,7 +85,8 @@ class Sensor:
     def get_values(self, update_type = True, update_mode = True):
         if (self.nxt!=None and self.nxt.handle!=None):
             values = Libanxt.AnalogSensorValues()
-            if (int(self.nxt.libanxt.nxt_get_sensor_values(self.nxt.handle, self.port-1, byref(values)))==0):
+            v = int(self.nxt.libanxt.nxt_get_sensor_values(self.nxt.handle, self.port-1, byref(values)))
+            if (v==0):
                 if (update_type):
                     self.type = [k for k, v in self.types.items() if v == values.type][0]
                 if (update_mode):

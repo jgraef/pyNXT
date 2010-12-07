@@ -25,13 +25,13 @@ class CameraSensor(DigitalSensor):
                       "LINE": 0x4C}
     
     def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
-        DigitalSensor.__init__(self, nxt, i2c_addr)
+        DigitalSensor.__init__(self, nxt, port, i2c_addr)
 
     def read(self):
         return self.get_objects()
 
     def get_objects(self):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
 
         n = int(self.nxt.libanxt.nxt_cam_num_objects(self.nxt.handle, self.port-1))
         if (n>0):
@@ -53,7 +53,7 @@ class CameraSensor(DigitalSensor):
             return False
             
     def get_colormap(self):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
 
         colormap = Libanxt.CameraColormap()
         if (int(self.nxt.libanxt.nxt_cam_get_colormap(self.nxt.handle, self.port-1, byref(colormap)))==0):
@@ -67,17 +67,17 @@ class CameraSensor(DigitalSensor):
             return False
 
     def enable_tracking(self, enable = True):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
         self.nxt.libanxt.nxt_cam_enable_tracking(self.nxt.handle, self.port-1, 1 if enable else 0)
 
     def set_trackingmode(self, mode = "OBJECT"):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
         self.nxt.libanxt.nxt_cam_set_trackingmode(self.nxt.handle, self.port-1, self.tracking_modes[mode])
 
     def reset(self):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
         self.nxt.libanxt.nxt_cam_reset(self.nxt.handle, self.port-1)
 
     def nxt_cam_enable_colorsort(self, enable = True):
-        self.set_addr_param("psp")
+        self.set_addr_param("cam")
         self.nxt.libanxt.nxt_cam_enable_colorsort(self.nxt.handle, self.port-1, 1 if enable else 0)

@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ctypes import CDLL, c_int, c_void_p, c_char_p, byref
-from .File import File
+from .File import FileIO
 from .Module import Module
 
 def NXT(name = None, host = "localhost", port = 51337, password = ""):

@@ -17,17 +17,19 @@
 
 from ctypes import CDLL, c_int, c_void_p, c_char, c_long, c_char_p, byref, POINTER, cast
 from .Libanxt import Libanxt
+import io
 
-class File:
+class FileIO(io.RawIOBase):
     oflags = {"OWFRAG": 0,
               "OWLINE": 1,
               "OAPPND": 2,
               "OREAD":  4,
               "OWOVER": 8}
 
-    def __init__(self, nxt):
+    def __init__(self, nxt, path, mode = "r", filesize = None):
         self.nxt = nxt
         self.handle = None
+        self.open(path, oflags, filesize)
 
     def __del__(self):
         self.close()

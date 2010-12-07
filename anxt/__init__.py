@@ -54,7 +54,6 @@ if __name__!="__main__":
     from .Motor import Motor
     from .Sensor import Sensor, AnalogSensor, TouchSensor, LightSensor, SoundSensor, DigitalSensor
     from .I2C import I2C
-    from .File import File
     from .Display import Display, DisplayHandle
     from .Module import Module
     from .UltrasonicSensor import UltrasonicSensor

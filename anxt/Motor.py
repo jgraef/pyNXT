@@ -62,7 +62,7 @@ class Motor:
     def is_turned_on(self):
         return int(self.nxt.libanxt.nxt_motor_is_turned_on(self.nxt.handle, self.port))==1
 
-    def use_brake(self):
+    def use_brake(self, on_off = True):
         return int(self.nxt.libanxt.nxt_motor_use_brake(self.nxt.handle, self.port, on_off))==0
 
     def is_using_brake(self):
