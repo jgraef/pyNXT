@@ -91,7 +91,7 @@ class Libanxt:
                       [l.nxt_reset_error, None, c_void_p],
                       [l.nxt_get_connection_type, c_int, c_void_p],
                       [l.nxt_send_msg, c_int, c_void_p, c_int, c_char_p],
-                      [l.nxt_recv_msg, c_int, c_void_p, c_int, c_int],
+                      [l.nxt_recv_msg, c_void_p, c_void_p, c_int, c_int],
                       [l.nxt_set_name, c_int, c_void_p, c_char_p],
                       [l.nxt_get_version, c_int, c_void_p, c_void_p, c_void_p, c_void_p, c_void_p],
                       [l.nxt_get_battery, c_int, c_void_p],
@@ -112,6 +112,7 @@ class Libanxt:
                       [l.nxt_wait_after_direct_command, None],
                       [l.nxt_wait_after_communication_command, None],
                       [l.nxt_wait_extra_long_after_communication_command, None],
+                      [l.nxt_free, None, c_void_p],
                       # libanxt/motor.c
                       [l.nxt_motor_reset, c_int, c_void_p, c_int],
                       [l.nxt_motor_set_state, c_int, c_void_p, c_int],

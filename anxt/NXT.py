@@ -122,12 +122,12 @@ class NXT:
 
     def recv_msg(self, mailbox, clear = True):
         if (self.handle!=None):
-            data = self.libanxt.nxt_send_msg(self.handle, c_int(mailbox), c_int(clear))
-            if (data==None):
+            ptr = self.libanxt.nxt_recv_msg(self.handle, c_int(mailbox), c_int(clear))
+            if (ptr==None):
                 return False
             else:
-                msg = data.decode()
-                # TODO free data
+                msg = c_char_p(ptr).value.decode()
+                self.libanxt.nxt_free(ptr)
                 return msg
         else:
             return False
@@ -168,13 +168,13 @@ class NXT:
 
     def run_program(self, program):
         if (self.handle!=None):
-            return __libnxt__.nxt_run_program(self.handle, c_char_p(program))==0
+            return self.libanxt.nxt_run_program(self.handle, c_char_p(program))==0
         else:
             return False
 
     def stop_program(self):
         if (self.handle!=None):
-            return __libnxt__.nxt_stop_program(self.handle)==0
+            return self.libanxt.nxt_stop_program(self.handle)==0
         else:
             return False
 
