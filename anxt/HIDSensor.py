@@ -20,6 +20,7 @@ from .Libanxt import Libanxt
 from .Sensor import DEFAULT_DIGITAL_PORT, DigitalSensor
 from ctypes import c_char_p
 
+
 class HIDSensor(DigitalSensor):
     hidmodes = {"ASCII": 0x41,
              "DIRECT": 0x44}
@@ -245,8 +246,8 @@ class HIDSensor(DigitalSensor):
             "SYSSLEEP":            0x82,
             "SYSWAKE":             0x83}
 
-    def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
-        DigitalSensor.__init__(self, nxt, i2c_addr)
+    def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = 0x04):
+        DigitalSensor.__init__(self, nxt, port, i2c_addr)
         
     def set_modifier(self, modifier):
         self.set_addr_param("hid")
@@ -258,7 +259,7 @@ class HIDSensor(DigitalSensor):
             k = self.keys[key]
         else:
             k = ord(key)
-        print("Sending", k)
+
         return int(self.nxt.libanxt.nxt_hid_set_key(self.nxt.handle, self.port-1, k))==0
 
     def transmit(self):

@@ -18,6 +18,7 @@
 # import CDLL
 from ctypes import CDLL, c_void_p, c_int, c_float, c_char_p, c_long, c_ubyte, POINTER, Union, Structure
 
+
 class Libanxt:
     class AnalogSensorValues(Structure):
         _fields_ = [("is_calibrated", c_int),
@@ -148,9 +149,9 @@ class Libanxt:
                       [l.nxt_i2c_write, c_int, c_void_p, c_int, c_int, c_int, c_int, c_void_p],
                       [l.nxt_i2c_cmd, c_int, c_void_p, c_int, c_int, c_int],
                       [l.nxt_i2c_set_i2caddr, c_int, c_void_p, c_int, c_int, c_int],
-                      [l.nxt_i2c_get_version, c_int, c_void_p, c_int, c_int],
-                      [l.nxt_i2c_get_vendorid, c_int, c_void_p, c_int, c_int],
-                      [l.nxt_i2c_get_deviceid, c_int, c_void_p, c_int, c_int],
+                      [l.nxt_i2c_get_version, c_char_p, c_void_p, c_int, c_int],
+                      [l.nxt_i2c_get_vendorid, c_char_p, c_void_p, c_int, c_int],
+                      [l.nxt_i2c_get_deviceid, c_char_p, c_void_p, c_int, c_int],
                       # libanxt/file.c
                       [l.nxt_file_open_write, c_int, c_void_p, c_char_p, c_int],
                       [l.nxt_file_open_write_linear, c_int, c_void_p, c_char_p, c_int],

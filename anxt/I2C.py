@@ -42,7 +42,7 @@ class I2C:
             return False
 
     def write(self, reg1, buf):
-        nreg = sizeof(buf)
+        nreg = len(buf)
         return int(self.nxt.libanxt.nxt_i2c_write(self.nxt.handle, self.port, self.addr, reg1, nreg, byref(buf)))
 
     def command(self, cmd):
@@ -59,10 +59,22 @@ class I2C:
         return True
 
     def get_version(self):
-        return int(self.nxt.libanxt.nxt_i2c_get_version(self.nxt.handle, self.port, self.addr))
+        r = self.nxt.libanxt.nxt_i2c_get_version(self.nxt.handle, self.port, self.addr)
+        if (r!=None):
+            return r.decode()
+        else:
+            return None
 
     def get_vendorid(self):
-        return int(self.nxt.libanxt.nxt_i2c_get_vendorid(self.nxt.handle, self.port, self.addr))
-
+        r = self.nxt.libanxt.nxt_i2c_get_vendorid(self.nxt.handle, self.port, self.addr)
+        if (r!=None):
+            return r.decode()
+        else:
+            return None
+        
     def get_deviceid(self):
-        return int(self.nxt.libanxt.nxt_i2c_get_deviceid(self.nxt.handle, self.port, self.addr))
+        r = self.nxt.libanxt.nxt_i2c_get_deviceid(self.nxt.handle, self.port, self.addr)
+        if (r!=None):
+            return r.decode()
+        else:
+            return None
