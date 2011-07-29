@@ -7,4 +7,4 @@ setup(name = "pyNXT",
       author_email = "janosch.graef@gmx.net",
       url = "http://janosch-graef.org/pyanxt",
       packages = ["anxt"],
-      license = "GNU GPL v3")
+      license = "GNU LGPL v3")
