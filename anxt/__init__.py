@@ -41,7 +41,7 @@ Libanxt.init_prototypes(__libanxt__)
 
 if __name__!="__main__":
     # general definitions
-    __version__ = "0.10"
+    __version__ = "0.11"
     # TODO set __all__
     __all__ = ["NXT",
                "Motor",

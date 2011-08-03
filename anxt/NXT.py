@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ctypes import CDLL, c_int, c_void_p, c_char_p, byref
+from ctypes import CDLL, c_int, c_void_p, c_char_p, byref, c_ubyte
 import io
 from .File import BufferedIO
 from .Module import Module
@@ -190,15 +190,17 @@ class NXT:
 
     def get_device_info(self):
         if (self.handle!=None):
-            # FIXME
-            bt_addr = create_buffer(6)
-            bt_strength = c_int
-            free_flash = c_int
+            bt_addr = (6*c_ubyte)()
+            bt_strength = c_int()
+            free_flash = c_int()
 
-            if (self.libanxt.nxt_get_devinfo(self.handle, None, byref(bt_addr), byref(bt_strength), byref(free_flash))==-1):
+            if (self.libanxt.nxt_get_devinfo(self.handle, None, bt_addr, byref(bt_strength), byref(free_flash))==-1):
                 return False
             else:
-                return (str(bt_addr), int(bt_strength), int(free_flash))
+                return {"bt_addr": "%02X:%02X:%02X:%02X:%02X:%02X"%tuple(bt_addr),
+                        "bt_addr_raw": tuple(bt_addr),
+                        "bt_strength": bt_strength.value,
+                        "free_flash": free_flash.value}
         else:
             return False
 
