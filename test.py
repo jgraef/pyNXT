@@ -28,7 +28,4 @@ if (not nxt):
 nxt.beep(220, 100)
 print("NXT Name: "+nxt.get_name())
 
-s = anxt.AccelerationSensor(nxt, 2)
-print(s.get_version())
-print(s.get_vendorid())
-print(s.get_deviceid())
+print(nxt.get_device_info())
