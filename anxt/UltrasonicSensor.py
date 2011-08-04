@@ -21,9 +21,10 @@ from .Sensor import DEFAULT_DIGITAL_PORT, DigitalSensor
 
 class UltrasonicSensor(DigitalSensor):
     def __init__(self, nxt, port = DEFAULT_DIGITAL_PORT, i2c_addr = DEFAULT_I2C_ADDR):
-        DigitalSensor.__init__(self, nxt, i2c_addr)
+        DigitalSensor.__init__(self, nxt, port, i2c_addr)
 
     def read(self):
         self.set_addr_param("us")
-        dist = int(self.nxt.libanxt.nxt_us_get_dist(self.nxt.handle, self.port-1))
+        dist = self.nxt.libanxt.nxt_us_get_dist(self.nxt.handle, self.port-1)
         return dist if (dist>=0) else False
+    
