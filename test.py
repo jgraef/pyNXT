@@ -27,5 +27,3 @@ if (not nxt):
 
 nxt.beep(220, 100)
 print("NXT Name: "+nxt.get_name())
-
-print(nxt.get_device_info())

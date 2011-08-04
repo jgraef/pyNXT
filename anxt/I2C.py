@@ -15,6 +15,8 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from ctypes import c_ubyte
+
 from .NXT import NXT
 
 
@@ -32,48 +34,51 @@ class I2C:
         self.port = port
         self.addr = addr
         
-    def read(self, reg1, nreg):
-        buf = (c_char * nreg)()
-        nreg = self.nxt.libanxt.nxt_i2c_read(self.nxt.handle, self.port, self.addr, reg1, nreg, byref(buf))
+    def read_reg(self, reg1, nreg):
+        buf = (c_ubyte * nreg)()
+        nreg = self.nxt.libanxt.nxt_i2c_read(self.nxt.handle, self.port-1, self.addr, reg1, nreg, buf)
         if (nreg>0):
-            resize(buf, nreg)
-            return buf
+            return bytes(tuple(buf))
         else:
             return False
 
-    def write(self, reg1, buf):
+    def write_reg(self, reg1, buf):
         nreg = len(buf)
-        return int(self.nxt.libanxt.nxt_i2c_write(self.nxt.handle, self.port, self.addr, reg1, nreg, byref(buf)))
+        buf = (c_ubyte * nreg)(*tuple(buf))
+        return self.nxt.libanxt.nxt_i2c_write(self.nxt.handle, self.port-1, self.addr, reg1, nreg, buf)
 
     def command(self, cmd):
-        return int(self.nxt.libanxt.nxt_i2c_cmd(self.nxt.handle, self.port, self.addr, cmd))
+        # NOTE: either str of length 1 or int is accepted as cmd
+        if (type(cmd)==str and len(cmd)==1):
+            cmd = ord(cmd)
+        return self.nxt.libanxt.nxt_i2c_cmd(self.nxt.handle, self.port-1, self.addr, cmd)
 
     def get_addr(self, hardware = False):
         return self.addr
 
     def set_addr(self, new, hardware = False):
         if (hardware):
-            if (int(self.nxt.libanxt.nxt_i2c_set_i2caddr(self.nxt.handle, self.port, self.addr, new))!=0):
+            if (int(self.nxt.libanxt.nxt_i2c_set_i2caddr(self.nxt.handle, self.port-1, self.addr, new))!=0):
                 return False
         self.addr = new
         return True
 
     def get_version(self):
-        r = self.nxt.libanxt.nxt_i2c_get_version(self.nxt.handle, self.port, self.addr)
+        r = self.nxt.libanxt.nxt_i2c_get_version(self.nxt.handle, self.port-1, self.addr)
         if (r!=None):
             return r.decode()
         else:
             return None
 
     def get_vendorid(self):
-        r = self.nxt.libanxt.nxt_i2c_get_vendorid(self.nxt.handle, self.port, self.addr)
+        r = self.nxt.libanxt.nxt_i2c_get_vendorid(self.nxt.handle, self.port-1, self.addr)
         if (r!=None):
             return r.decode()
         else:
             return None
         
     def get_deviceid(self):
-        r = self.nxt.libanxt.nxt_i2c_get_deviceid(self.nxt.handle, self.port, self.addr)
+        r = self.nxt.libanxt.nxt_i2c_get_deviceid(self.nxt.handle, self.port-1, self.addr)
         if (r!=None):
             return r.decode()
         else:
