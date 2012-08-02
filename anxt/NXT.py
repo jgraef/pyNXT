@@ -71,7 +71,9 @@ class NXT:
     libanxt = None
 
     def __init__(self, name = None, hostname = "localhost", port = 51337, password = ""):
-        self.handle = self.libanxt.nxt_open_net(name, hostname, port, password)
+        if (name != None):
+            name = name.encode()
+        self.handle = self.libanxt.nxt_open_net(name, hostname.encode(), port, password.encode())
         if (self.handle==None):
             raise NXTError("Can't find NXT")
         
@@ -126,7 +128,7 @@ class NXT:
             if (ptr==None):
                 return False
             else:
-                msg = c_char_p(ptr).value.decode()
+                msg = c_char_p(ptr).value
                 self.libanxt.nxt_free(ptr)
                 return msg
         else:
