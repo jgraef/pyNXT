@@ -35,7 +35,7 @@ def load_doc(filename = "__doc__.txt"):
         
 
 # load libraries
-__libanxt__ = Libanxt.load("libanxt.so")
+__libanxt__ = Libanxt.load("/usr/local/lib/libanxt.so")
 assert __libanxt__!=None
 Libanxt.init_prototypes(__libanxt__)
 
